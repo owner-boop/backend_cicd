@@ -16,5 +16,5 @@ netstat -tulpn
 grep -rnw /etc/nginx/ -e '80'
 
 sudo gpasswd -a www-data ubuntu
-#sudo systemctl restart nginx
+sudo systemctl restart nginx
 
