@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ssh root@134.209.208.182 <<EOF
-  cd blogprojectdrf
+  cd fd_backend
   git pull 
   source env/bin/activate
   ./manage.py migrate
