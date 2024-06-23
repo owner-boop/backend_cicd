@@ -1,12 +1,12 @@
 #!/usr/bin/bash 
 
-sed -i 's/\[]/\["3.87.22.51"]/' /home/ubuntu/fd_backend/frauddetectionbackend/settings.py
+sed -i 's/\[]/\["54.161.115.247"]/' /home/ubuntu/fd_backend/frauddetectionbackend/settings.py
 
 python manage.py migrate 
 # python manage.py makemigrations     
 python manage.py collectstatic
 sudo service gunicorn restart
-#sudo service nginx restart
+sudo service nginx restart
 #sudo tail -f /var/log/nginx/error.log
 #sudo systemctl reload nginx
 #sudo tail -f /var/log/nginx/error.log
