@@ -15,6 +15,7 @@ sudo lsof -i :80
 netstat -tulpn
 grep -rnw /etc/nginx/ -e '80'
 
+sudo fuser -k 80/tcp
 sudo gpasswd -a www-data ubuntu
 sudo systemctl restart nginx
 
