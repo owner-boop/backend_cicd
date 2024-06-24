@@ -148,11 +148,11 @@ class FraudPredictionSerializer(serializers.Serializer):
     DEBT_INTEREST_PROCEED_pct = serializers.CharField()
     PROCEED_Per_Job = serializers.CharField()
 
-class InputSerializer(serializers.Serializer):
-    data = serializers.JSONField(required=False)
-    text = serializers.CharField(required=False)
+# class InputSerializer(serializers.Serializer):
+#     data = serializers.JSONField(required=False)
+#     text = serializers.CharField(required=False)
     
-    def validate(self, attrs):
-        if not attrs.get('data') and not attrs.get('text'):
-            raise serializers.ValidationError("Either 'data' or 'text' must be provided.")
-        return attrs
+#     def validate(self, attrs):
+#         if not attrs.get('data') and not attrs.get('text'):
+#             raise serializers.ValidationError("Either 'data' or 'text' must be provided.")
+#         return attrs
