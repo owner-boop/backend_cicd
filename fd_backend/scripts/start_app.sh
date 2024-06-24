@@ -1,6 +1,6 @@
 #!/usr/bin/bash 
 
-sed -i 's/\[]/\["54.234.51.242"]/' /home/ubuntu/fd_backend/frauddetectionbackend/settings.py
+sed -i 's/\[]/\["54.161.115.247"]/' /home/ubuntu/fd_backend/frauddetectionbackend/settings.py
 
 python manage.py migrate 
 # python manage.py makemigrations     

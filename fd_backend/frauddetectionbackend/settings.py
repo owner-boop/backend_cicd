@@ -92,7 +92,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AWS_ACCESS_KEY_ID = '123'
-AWS_SECRET_ACCESS_KEY = 'xyz'
+AWS_SECRET_ACCESS_KEY = 'XYZ'
 AWS_REGION = 'us-east-1'
 
 # Internationalization
@@ -127,9 +127,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
     "https://main.d19ucnefwiw00z.amplifyapp.com",
-    # "http://54.236.209.108",
-    # "http://3.83.230.56",
-    # "http://localhost",
+    "http://54.236.209.108",
+    "http://3.83.230.56",
+    "http://localhost",
 ]
 
 
