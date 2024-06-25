@@ -259,8 +259,6 @@ class ChartsData(APIView):
         waterfall_data.update(components_sum)
 
         
-
-        print("Water fall ready")
         
         BarChartRecord = {
             'pie_records': {
@@ -416,6 +414,7 @@ def XGBoost_model(csv_row):
     model = joblib.load(BytesIO(model_bytes))
     prediction = model.predict_proba(input_data)
     return prediction
+
 def RandomForest_model(csv_row):
     input_data = pd.DataFrame([csv_row])
     bucket_name = 'fraud-detection-esse'
@@ -468,13 +467,13 @@ class FraudPredictionAPIView(APIView):
             prediction3 = RandomForest_model(serializer.validated_data)
             prediction4 = LogisticRegression_model(serializer.validated_data)
             prediction5 = decision_tree(serializer.validated_data)
-
+            
             result = {
-                'XGBoost_model' : round(prediction1[0][1], 3),
-                'LightGBM' : round(prediction2[0][1], 3),
-                'RandomForest_model' : round(prediction3[0][1], 3),
-                'LogisticRegression_model' :round(prediction4[0][1], 3),
-                'Decision_tree' : round(prediction5[0][1] , 3)
+                'XGBoost_model' : f'{round(prediction1[0][1], 3)}%',
+                'LightGBM' : f'{round(prediction2[0][1], 3)}%',
+                'RandomForest_model' : f'{round(prediction3[0][1], 3)}%',
+                'LogisticRegression_model' :f'{round(prediction4[0][1], 3)}%',
+                'Decision_tree' : f'{round(prediction5[0][1] , 3)}%'
 
             }
             return Response({'status': 200, 'message': 'Prediction successfully', 'payload': result}, status=status.HTTP_200_OK)

@@ -92,7 +92,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AWS_ACCESS_KEY_ID = '123'
-AWS_SECRET_ACCESS_KEY = 'XYZ'
+AWS_SECRET_ACCESS_KEY = 'xyz'
 AWS_REGION = 'us-east-1'
 
 # Internationalization
