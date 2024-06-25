@@ -585,7 +585,7 @@ class multigraphsAPIView(APIView):
             response = s3.get_object(Bucket=bucket_name, Key=key)
             buffer = []
             for i, line in enumerate(response['Body'].iter_lines()):
-                if i >= 100:  # Limiting to 100 lines for performance
+                if i >= 2000:  # Limiting to 100 lines for performance
                     break
                 buffer.append(line.decode('utf-8'))
             
