@@ -540,8 +540,8 @@ class InvokeAPIView(APIView):
             data = serializer.validated_data.get('data')
             text = serializer.validated_data.get('text')
             query = data if data else text
-            # response = invoke_fun(query)
-            return Response({'message': 'response'}, status=status.HTTP_200_OK)
+            response = invoke_fun(query)
+            return Response({'message': response}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class FrequencyAPIView(APIView):
