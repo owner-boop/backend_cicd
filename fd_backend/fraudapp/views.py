@@ -460,78 +460,78 @@ def decision_tree(csv_row):
 
 
 
-# # Set environment variables using values from settings
-# os.environ["AWS_ACCESS_KEY_ID"] = settings.AWS_ACCESS_KEY_ID
-# os.environ["AWS_SECRET_ACCESS_KEY"] = settings.AWS_SECRET_ACCESS_KEY
-# s3=boto3.client('s3')
-# file_path = f"/tmp"
-# Path(file_path).mkdir(parents=True, exist_ok=True)
-# s3.download_file(Bucket="fraud-detection-esse", Key='vectorstorealltxt/db_faiss/index.faiss', Filename=f"{file_path}/my_faiss.faiss")
-# s3.download_file(Bucket="fraud-detection-esse", Key='vectorstorealltxt/db_faiss/index.pkl', Filename=f"{file_path}/my_faiss.pkl")
-# bedrock_runtime = boto3.client("bedrock-runtime", "us-east-1")
-# bedrock_embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v2:0",
-#                                        client=bedrock_runtime)
-# llm = ChatBedrock(
-#     client=bedrock_runtime,
-#     model_id="anthropic.claude-3-sonnet-20240229-v1:0",
-#     model_kwargs={"temperature": 0}
-# )
-# def load_knowledgeBase():
-#     bedrock_runtime = boto3.client("bedrock-runtime", "us-east-1")
-#     bedrock_embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v2:0",
-#                                        client=bedrock_runtime)
-#     db = FAISS.load_local(
-#         index_name="my_faiss",
-#         folder_path=file_path,
-#         embeddings=bedrock_embeddings,
-#          allow_dangerous_deserialization=True
-#     )
-#     return db
-# def load_prompt():
-#     prompt = """ Based on the context you need to classify the question as fraud or not fraud. You also need to tell the reason for the classification.
-#     Given below is the context and question of the user.
-#     context = {context}
-#     question = {question}
-#     if the answer is not in the given data, answer "use model knowledge base"
-#     """
-#     prompt = ChatPromptTemplate.from_template(prompt)
-#     return prompt
-# knowledgeBase = load_knowledgeBase()
-# def format_docs(docs):
-#     return "\n\n".join(doc.page_content for doc in docs)
-# prompt = load_prompt()
-# def json_to_paragraph(json_data):
-#     paragraph = f"The loan with number {json_data['LoanNumber']} was approved on {json_data['DateApproved']} through the Small Business Administration (SBA) office with code {json_data['SBAOfficeCode']}, us>"
-#     return paragraph
+# Set environment variables using values from settings
+os.environ["AWS_ACCESS_KEY_ID"] = settings.AWS_ACCESS_KEY_ID
+os.environ["AWS_SECRET_ACCESS_KEY"] = settings.AWS_SECRET_ACCESS_KEY
+s3=boto3.client('s3')
+file_path = f"/tmp"
+Path(file_path).mkdir(parents=True, exist_ok=True)
+s3.download_file(Bucket="fraud-detection-esse", Key='vectorstorealltxt/db_faiss/index.faiss', Filename=f"{file_path}/my_faiss.faiss")
+s3.download_file(Bucket="fraud-detection-esse", Key='vectorstorealltxt/db_faiss/index.pkl', Filename=f"{file_path}/my_faiss.pkl")
+bedrock_runtime = boto3.client("bedrock-runtime", "us-east-1")
+bedrock_embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v2:0",
+                                       client=bedrock_runtime)
+llm = ChatBedrock(
+    client=bedrock_runtime,
+    model_id="anthropic.claude-3-sonnet-20240229-v1:0",
+    model_kwargs={"temperature": 0}
+)
+def load_knowledgeBase():
+    bedrock_runtime = boto3.client("bedrock-runtime", "us-east-1")
+    bedrock_embeddings = BedrockEmbeddings(model_id="amazon.titan-embed-text-v2:0",
+                                       client=bedrock_runtime)
+    db = FAISS.load_local(
+        index_name="my_faiss",
+        folder_path=file_path,
+        embeddings=bedrock_embeddings,
+         allow_dangerous_deserialization=True
+    )
+    return db
+def load_prompt():
+    prompt = """ Based on the context you need to classify the question as fraud or not fraud. You also need to tell the reason for the classification.
+    Given below is the context and question of the user.
+    context = {context}
+    question = {question}
+    if the answer is not in the given data, answer "use model knowledge base"
+    """
+    prompt = ChatPromptTemplate.from_template(prompt)
+    return prompt
+knowledgeBase = load_knowledgeBase()
+def format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
+prompt = load_prompt()
+def json_to_paragraph(json_data):
+    paragraph = f"The loan with number {json_data['LoanNumber']} was approved on {json_data['DateApproved']} through the Small Business Administration (SBA) office with code {json_data['SBAOfficeCode']}, us>"
+    return paragraph
 
-# def json_to_paragraph(json_data):
-#     paragraph = f"The loan with number {json_data['LoanNumber']} was approved on {json_data['DateApproved']} through the Small Business Administration (SBA) office with code {json_data['SBAOfficeCode']}, using the Processing Method {json_data['ProcessingMethod']}. The borrower, {json_data['BorrowerName']}, located at {json_data['BorrowerAddress']}, {json_data['BorrowerCity']}, {json_data['BorrowerState']} {json_data['BorrowerZip']}, saw its loan status marked as \"{json_data['LoanStatus']}\" on {json_data['LoanStatusDate']}, with a term of {json_data['Term']} months and a {json_data['SBAGuarantyPercentage']}% SBA guaranty percentage. The loan, initially approved at ${json_data['InitialApprovalAmount']}, maintained its current approval amount at the same value, with no undisbursed amounts. Classified as a {json_data['FranchiseName']}, the loan was serviced by {json_data['ServicingLenderName']}, situated at {json_data['ServicingLenderAddress']}, {json_data['ServicingLenderCity']}, {json_data['ServicingLenderState']} {json_data['ServicingLenderZip']}. The loan's rural-urban indicator was '{json_data['RuralUrbanIndicator']}', with no Hubzone or Low and Moderate Income (LMI) indicators. The business, {json_data['BusinessAgeDescription']}, operates in {json_data['ProjectCity']}, {json_data['ProjectState']} {json_data['ProjectZip']}, within the CD {json_data['CD']} area, reporting {json_data['JobsReported']} jobs and carrying a NAICS code of {json_data['NAICSCode']}. The borrower's race and ethnicity were {json_data['Race']} and {json_data['Ethnicity']}, respectively. While the loan proceeds were allocated predominantly to payroll (${json_data['PAYROLL_PROCEED']}), with minimal amounts designated to utilities, the forgiveness amount totaled ${json_data['ForgivenessAmount']}, granted on {json_data['ForgivenessDate']}, resulting in a forgiveness percentage of {json_data['ForgivenPercentage']}%. Despite slight discrepancies in approval and total proceeds, the loan demonstrated a positive impact, averaging ${json_data['PROCEED_Per_Job']} per job created or retained."
+def json_to_paragraph(json_data):
+    paragraph = f"The loan with number {json_data['LoanNumber']} was approved on {json_data['DateApproved']} through the Small Business Administration (SBA) office with code {json_data['SBAOfficeCode']}, using the Processing Method {json_data['ProcessingMethod']}. The borrower, {json_data['BorrowerName']}, located at {json_data['BorrowerAddress']}, {json_data['BorrowerCity']}, {json_data['BorrowerState']} {json_data['BorrowerZip']}, saw its loan status marked as \"{json_data['LoanStatus']}\" on {json_data['LoanStatusDate']}, with a term of {json_data['Term']} months and a {json_data['SBAGuarantyPercentage']}% SBA guaranty percentage. The loan, initially approved at ${json_data['InitialApprovalAmount']}, maintained its current approval amount at the same value, with no undisbursed amounts. Classified as a {json_data['FranchiseName']}, the loan was serviced by {json_data['ServicingLenderName']}, situated at {json_data['ServicingLenderAddress']}, {json_data['ServicingLenderCity']}, {json_data['ServicingLenderState']} {json_data['ServicingLenderZip']}. The loan's rural-urban indicator was '{json_data['RuralUrbanIndicator']}', with no Hubzone or Low and Moderate Income (LMI) indicators. The business, {json_data['BusinessAgeDescription']}, operates in {json_data['ProjectCity']}, {json_data['ProjectState']} {json_data['ProjectZip']}, within the CD {json_data['CD']} area, reporting {json_data['JobsReported']} jobs and carrying a NAICS code of {json_data['NAICSCode']}. The borrower's race and ethnicity were {json_data['Race']} and {json_data['Ethnicity']}, respectively. While the loan proceeds were allocated predominantly to payroll (${json_data['PAYROLL_PROCEED']}), with minimal amounts designated to utilities, the forgiveness amount totaled ${json_data['ForgivenessAmount']}, granted on {json_data['ForgivenessDate']}, resulting in a forgiveness percentage of {json_data['ForgivenPercentage']}%. Despite slight discrepancies in approval and total proceeds, the loan demonstrated a positive impact, averaging ${json_data['PROCEED_Per_Job']} per job created or retained."
 
-# def invoke_fun(query):
-#     try:
-#         data = query
-#         query = json_to_paragraph(data)
-#     except:
-#         query = query
-#     if query:
-#         response = None
-#         if len(query) > 1000:
-#             similar_embeddings = knowledgeBase.similarity_search(query)
-#             similar_embeddings = FAISS.from_documents(documents=similar_embeddings, embedding=bedrock_embeddings)
-#             retriever = similar_embeddings.as_retriever()
-#             rag_chain = (
-#                 {"context": retriever | format_docs, "question": RunnablePassthrough()}
-#                 | prompt
-#                 | llm
-#                 | StrOutputParser()
-#                 )
-#             response = rag_chain.invoke(query)
-#         if response is None:
-#             response = llm.invoke(query)
-#             return response.content.strip()
-#         else:
-#             return response
-#     return "No query provided"
+def invoke_fun(query):
+    try:
+        data = query
+        query = json_to_paragraph(data)
+    except:
+        query = query
+    if query:
+        response = None
+        if len(query) > 1000:
+            similar_embeddings = knowledgeBase.similarity_search(query)
+            similar_embeddings = FAISS.from_documents(documents=similar_embeddings, embedding=bedrock_embeddings)
+            retriever = similar_embeddings.as_retriever()
+            rag_chain = (
+                {"context": retriever | format_docs, "question": RunnablePassthrough()}
+                | prompt
+                | llm
+                | StrOutputParser()
+                )
+            response = rag_chain.invoke(query)
+        if response is None:
+            response = llm.invoke(query)
+            return response.content.strip()
+        else:
+            return response
+    return "No query provided"
 
 class InvokeAPIView(APIView):
     def post(self, request):
@@ -830,7 +830,7 @@ class FraudPredictionAPIView(APIView):
             else:
                 llmmain = "0%"
             result = {
-                'XGBoost_model' : f'{round(prediction1[0][1], 3)*100}%',
+                'XGBoost_model' : f'{round(round(prediction1[0][1], 3)*100,3)}%',
                 'LightGBM' : f'{round(prediction2[0][1], 3)*100}%',
                 'RandomForest_model' : f'{round(prediction3[0][1], 3)*100}%',
                 'LogisticRegression_model' :f'{round(prediction4[0][1], 3)*100}%',
