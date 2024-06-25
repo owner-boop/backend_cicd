@@ -886,6 +886,10 @@ class FraudPredictionAPIView(APIView):
             df_test = json_to_dataframe(json_data)
            
             llmmain = main(df_test)
+            if llmmain==True:
+                llmmain="100%"
+            else:
+                llmmain="0.0%"
 
             
 
