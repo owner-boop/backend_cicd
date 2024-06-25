@@ -901,7 +901,7 @@ class FraudPredictionAPIView(APIView):
                 'RandomForest_model' : f'{round(prediction3[0][1], 3)*100}%',
                 'LogisticRegression_model' :f'{round(prediction4[0][1], 3)*100}%',
                 'Decision_tree' : f'{round(prediction5[0][1] , 3)*100}%',
-                'response' : llmmain
+                'LLM' : llmmain
 
             }
             return Response({'status': 200, 'message': 'Prediction successfully', 'payload': result}, status=status.HTTP_200_OK)
