@@ -1,7 +1,7 @@
 from django.shortcuts import render 
 from django.http import HttpResponse
 import pandas as pd
-import os
+
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,9 +16,6 @@ from smart_open import open
 import gzip
 from io import BytesIO
 from json import loads, dumps
-
-
-
 
 from pathlib import Path
 from langchain_core.output_parsers import StrOutputParser
@@ -38,9 +35,12 @@ from datetime import datetime
 from sklearn.preprocessing import LabelEncoder
 import xgboost as xgb
 import joblib
+import pickle
+import json
+import faiss
+import re
+import os , io
 
-# from faiss_index import FAISS
-# from bedrock_llm import ChatBedrock, ChatPromptTemplate, StrOutputParser
 
 def home(request):
     return HttpResponse("hello world")
@@ -68,7 +68,7 @@ class ChartsData(APIView):
         buffer = []
             # Read the object in chunks
         for i, line in enumerate(response['Body'].iter_lines()):
-            if i >= 10:
+            if i >= 500:
                 break
             buffer.append(line.decode('utf-8'))
 
@@ -87,7 +87,7 @@ class ChartsData(APIView):
 
         # Combine all the counts into one dictionary
         combined_counts = {**loan_status_counts, **business_type_counts, **race_counts, **ethnicity_counts}
-
+        print(combined_counts)
         # Prepare data for Chart.js
         print("Pie Chart complete")
         
@@ -356,7 +356,7 @@ class FileReaderAPIView(APIView):
 
             # Read the object in chunks
             for i, line in enumerate(response['Body'].iter_lines()):
-                if i >= 10:
+                if i >= 500:
                     break
                 buffer.append(line.decode('utf-8'))
 
@@ -388,7 +388,6 @@ class gpt(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 session = boto3.Session(
     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
     aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
@@ -403,7 +402,6 @@ def encode(data):
     for col in categorical_columns:
         data[col] = encoder.fit_transform(data[col])
     return data
-
 def XGBoost_model(csv_row):
     input_data = pd.DataFrame([csv_row])
     input_data_encoded = encode(input_data)
@@ -414,7 +412,6 @@ def XGBoost_model(csv_row):
     model = joblib.load(BytesIO(model_bytes))
     prediction = model.predict_proba(input_data)
     return prediction
-
 def RandomForest_model(csv_row):
     input_data = pd.DataFrame([csv_row])
     bucket_name = 'fraud-detection-esse'
@@ -446,7 +443,6 @@ def LightGBM(csv_row):
     return prediction
 def decision_tree(csv_row):
     input_data = pd.DataFrame([csv_row])
-    input_data_encoded = encode(input_data)
     bucket_name = 'fraud-detection-esse'
     key = 'DecisionTree_model.joblib'
     response = s3.get_object(Bucket=bucket_name, Key=key)
@@ -454,6 +450,7 @@ def decision_tree(csv_row):
     model = joblib.load(BytesIO(model_bytes))
     prediction = model.predict_proba(input_data)
     return prediction
+
 class FraudPredictionAPIView(APIView):
     def post(self, request):
         serializer = FraudPredictionSerializer(data=request.data)
@@ -461,19 +458,20 @@ class FraudPredictionAPIView(APIView):
             input_data = encode(pd.DataFrame([serializer.validated_data]))
             if input_data is None:
                 return Response({'status': 400, 'message': 'Invalid input data'}, status=status.HTTP_400_BAD_REQUEST)
-
+           
             prediction1 = XGBoost_model(serializer.validated_data)
             prediction2 = LightGBM(serializer.validated_data)
             prediction3 = RandomForest_model(serializer.validated_data)
             prediction4 = LogisticRegression_model(serializer.validated_data)
             prediction5 = decision_tree(serializer.validated_data)
-            
+           
+
             result = {
-                'XGBoost_model' : f'{round(prediction1[0][1], 3)}%',
-                'LightGBM' : f'{round(prediction2[0][1], 3)}%',
-                'RandomForest_model' : f'{round(prediction3[0][1], 3)}%',
-                'LogisticRegression_model' :f'{round(prediction4[0][1], 3)}%',
-                'Decision_tree' : f'{round(prediction5[0][1] , 3)}%'
+                'XGBoost_model' : f'{round(prediction1[0][1], 3)*100}%',
+                'LightGBM' : f'{round(prediction2[0][1], 3)*100}%',
+                'RandomForest_model' : f'{round(prediction3[0][1], 3)*100}%',
+                'LogisticRegression_model' :f'{round(prediction4[0][1], 3)*100}%',
+                'Decision_tree' : f'{round(prediction5[0][1] , 3)*100}%'
 
             }
             return Response({'status': 200, 'message': 'Prediction successfully', 'payload': result}, status=status.HTTP_200_OK)
@@ -553,6 +551,7 @@ def invoke_fun(query):
         else:
             return response
     return "No query provided"
+
 class InvokeAPIView(APIView):
     def post(self, request):
         serializer = InputSerializer(data=request.data)
@@ -591,6 +590,47 @@ class FrequencyAPIView(APIView):
             }
             
             serializer = FrequencySerializer(data=data)
+            if serializer.is_valid():
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class multigraphsAPIView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        s3 = boto3.client('s3')
+        bucket_name = 'fraud-detection-esse'
+        key = 'dataset_with_labels.csv'
+        
+        try:
+            response = s3.get_object(Bucket=bucket_name, Key=key)
+            buffer = []
+            for i, line in enumerate(response['Body'].iter_lines()):
+                if i >= 100:  # Limiting to 100 lines for performance
+                    break
+                buffer.append(line.decode('utf-8'))
+            
+            csv_content = '\n'.join(buffer)
+            df = pd.read_csv(StringIO(csv_content))
+            
+            state_counts = df['BorrowerState'].value_counts()
+            top5_states = state_counts.head(5).to_dict()
+            
+            columns_of_interest = ['LoanStatus', 'RuralUrbanIndicator', 'Label']
+            value_counts_arrays_specific = {column: list(df[column].value_counts().values) for column in columns_of_interest}
+            
+            # Prepare the data for the serializer
+            data = {
+                'top5_states': top5_states,
+                'value_counts_arrays_specific': value_counts_arrays_specific
+            }
+
+            serializer = GraphsSerializer(data=data)
             if serializer.is_valid():
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
