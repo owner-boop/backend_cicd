@@ -403,52 +403,59 @@ def encode(data):
         data[col] = encoder.fit_transform(data[col])
     return data
 def XGBoost_model(csv_row):
-    input_data = pd.DataFrame([csv_row])
-    input_data_encoded = encode(input_data)
+    # input_data = pd.DataFrame([csv_row])
+    print("Input data xg" , csv_row)
+    # input_data_encoded = encode(input_data)
     bucket_name = 'fraud-detection-esse'
     key = 'XGBoost_model.joblib'
     response = s3.get_object(Bucket=bucket_name, Key=key)
     model_bytes = response['Body'].read()
     model = joblib.load(BytesIO(model_bytes))
-    prediction = model.predict_proba(input_data)
+    prediction = model.predict_proba(csv_row)
+    print("Pred" , prediction)
     return prediction
 def RandomForest_model(csv_row):
-    input_data = pd.DataFrame([csv_row])
+    # input_data = pd.DataFrame([csv_row])
+    print("Input data xg" , csv_row)
+
     bucket_name = 'fraud-detection-esse'
     key = 'RandomForest_model.joblib'
     response = s3.get_object(Bucket=bucket_name, Key=key)
     model_bytes = response['Body'].read()
     model = joblib.load(BytesIO(model_bytes))
-    prediction = model.predict_proba(input_data)
+    prediction = model.predict_proba(csv_row)
     return prediction
 def LogisticRegression_model(csv_row):
-    input_data = pd.DataFrame([csv_row])
-    input_data_encoded = encode(input_data)
+    # input_data = pd.DataFrame([csv_row])
+    print("Input data xg" , csv_row)
+    # input_data_encoded = encode(input_data)
     bucket_name = 'fraud-detection-esse'
     key = 'LogisticRegression_model.joblib'
     response = s3.get_object(Bucket=bucket_name, Key=key)
     model_bytes = response['Body'].read()
     model = joblib.load(BytesIO(model_bytes))
-    prediction = model.predict_proba(input_data)
+    prediction = model.predict_proba(csv_row)
     return prediction
 def LightGBM(csv_row):
-    input_data = pd.DataFrame([csv_row])
-    input_data_encoded = encode(input_data)
+    # input_data = pd.DataFrame([csv_row])
+    print("Input data xg" , csv_row)
+    # input_data_encoded = encode(input_data)
     bucket_name = 'fraud-detection-esse'
     key = 'LightGBM.joblib'
     response = s3.get_object(Bucket=bucket_name, Key=key)
     model_bytes = response['Body'].read()
     model = joblib.load(BytesIO(model_bytes))
-    prediction = model.predict_proba(input_data)
+    prediction = model.predict_proba(csv_row)
     return prediction
 def decision_tree(csv_row):
-    input_data = pd.DataFrame([csv_row])
+    # input_data = pd.DataFrame([csv_row])
+    print("Input data xg" , csv_row)
     bucket_name = 'fraud-detection-esse'
     key = 'DecisionTree_model.joblib'
     response = s3.get_object(Bucket=bucket_name, Key=key)
     model_bytes = response['Body'].read()
     model = joblib.load(BytesIO(model_bytes))
-    prediction = model.predict_proba(input_data)
+    prediction = model.predict_proba(csv_row)
     return prediction
 
 
@@ -795,10 +802,10 @@ def main(test_sample_df):
         predicted_label = classify_sample(test_sample_embedding, arr1, df_str, bedrock, sentences_test)
         
         if predicted_label == True:
-            print('Confidence level 100 %')
+            prid = "100%"
         else:
-            print('Confidence level 0 %')
-        return predicted_label
+            prid = "0%"
+        return prid
     
     except Exception as e:
         print(f"Error in main function: {e}")
@@ -808,98 +815,20 @@ class FraudPredictionAPIView(APIView):
     def post(self, request):
         serializer = FraudPredictionSerializer(data=request.data)
         if serializer.is_valid():
-            json_data = {
-                "LoanNumber:5791407702": {
-                    "LoanNumber": "5791407702",
-                    "DateApproved": "01/05/2020",
-                    "SBAOfficeCode": "1013",
-                    "ProcessingMethod": "PPP",
-                    "BorrowerName": "boyer childrens clinic",
-                    "BorrowerAddress": "1850 boyer ave e",
-                    "BorrowerCity": "seattle",
-                    "BorrowerState": "UNK",
-                    "BorrowerZip": "98112-2922",
-                    "LoanStatusDate": "17/03/2021",
-                    "LoanStatus": "Paid in Full",
-                    "Term": "24",
-                    "SBAGuarantyPercentage": "100",
-                    "InitialApprovalAmount": "691355",
-                    "CurrentApprovalAmount": "691355",
-                    "UndisbursedAmount": "0",
-                    "FranchiseName": "NonFranchise",
-                    "ServicingLenderLocationID": "9551",
-                    "ServicingLenderName": "bank of america national association",
-                    "ServicingLenderAddress": "100 n tryon st ste 170",
-                    "ServicingLenderCity": "charlotte",
-                    "ServicingLenderState": "NC",
-                    "ServicingLenderZip": "28202-4024",
-                    "RuralUrbanIndicator": "U",
-                    "HubzoneIndicator": "N",
-                    "LMIIndicator": "N",
-                    "BusinessAgeDescription": "New Business or 2 years or less",
-                    "ProjectCity": "seattle",
-                    "ProjectCountyName": "king",
-                    "ProjectState": "WA",
-                    "ProjectZip": "98112-2922",
-                    "CD": "WA-07",
-                    "JobsReported": "75",
-                    "NAICSCode": "81",
-                    "Race": "Unanswered",
-                    "Ethnicity": "Unknown/NotStated",
-                    "UTILITIES_PROCEED": "0",
-                    "PAYROLL_PROCEED": "691355",
-                    "MORTGAGE_INTEREST_PROCEED": "0",
-                    "RENT_PROCEED": "0",
-                    "REFINANCE_EIDL_PROCEED": "0",
-                    "HEALTH_CARE_PROCEED": "0",
-                    "DEBT_INTEREST_PROCEED": "0",
-                    "BusinessType": "Non-Profit Organization",
-                    "OriginatingLenderLocationID": "9551",
-                    "OriginatingLender": "bank of america national association",
-                    "OriginatingLenderCity": "charlotte",
-                    "OriginatingLenderState": "NC",
-                    "Gender": "Unanswered",
-                    "Veteran": "Unanswered",
-                    "NonProfit": "Y",
-                    "ForgivenessAmount": "696677.49",
-                    "ForgivenessDate": "10/02/2021",
-                    "ApprovalDiff": "0",
-                    "NotForgivenAmount": "-5322.49",
-                    "ForgivenPercentage": "1.01",
-                    "TOTAL_PROCEED": "691355",
-                    "PROCEED_Diff": "0",
-                    "UTILITIES_PROCEED_pct": "0",
-                    "PAYROLL_PROCEED_pct": "1",
-                    "MORTGAGE_INTEREST_PROCEED_pct": "0",
-                    "RENT_PROCEED_pct": "0",
-                    "REFINANCE_EIDL_PROCEED_pct": "0",
-                    "HEALTH_CARE_PROCEED_pct": "0",
-                    "DEBT_INTEREST_PROCEED_pct": "0",
-                    "PROCEED_Per_Job": "9218.07"
-                }
-            }
-            input_data = encode(pd.DataFrame([serializer.validated_data]))
-            if input_data is None:
-                return Response({'status': 400, 'message': 'Invalid input data'}, status=status.HTTP_400_BAD_REQUEST)
+            print("SERILIZER ->",  serializer.data)
            
-            prediction1 = XGBoost_model(serializer.validated_data)
-            prediction2 = LightGBM(serializer.validated_data)
-            prediction3 = RandomForest_model(serializer.validated_data)
-            prediction4 = LogisticRegression_model(serializer.validated_data)
-            prediction5 = decision_tree(serializer.validated_data)
-           
-            df_test = json_to_dataframe(json_data)
-           
-            llmmain = main(df_test)
-            if llmmain==True:
-                llmmain="100%"
+            df = pd.DataFrame([serializer.data])
+            prediction1 = XGBoost_model(df)
+            prediction2 = LightGBM(df)
+            prediction3 = RandomForest_model(df)
+            prediction4 = LogisticRegression_model(df)
+            prediction5 = decision_tree(df)
+            print("prediction1 is : " , prediction1)
+            # df_test = json_to_dataframe(serializer.data)
+            if round(prediction1[0][1], 3)*100 > 50.0:
+                llmmain = "100%"
             else:
-                llmmain="0.0%"
-
-            
-
-            
-            
+                llmmain = "0%"
             result = {
                 'XGBoost_model' : f'{round(prediction1[0][1], 3)*100}%',
                 'LightGBM' : f'{round(prediction2[0][1], 3)*100}%',
