@@ -564,3 +564,38 @@ class InvokeAPIView(APIView):
             response = invoke_fun(query)
             return Response({'message': response}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class FrequencyAPIView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        s3 = boto3.client('s3')
+        bucket_name = 'fraud-detection-esse'
+        key = 'dataset_with_labels.csv'
+        
+        try:
+            response = s3.get_object(Bucket=bucket_name, Key=key)
+            buffer = []
+            for i, line in enumerate(response['Body'].iter_lines()):
+                if i >= 10000:
+                    break
+                buffer.append(line.decode('utf-8'))
+            
+            csv_content = '\n'.join(buffer)
+            df = pd.read_csv(StringIO(csv_content), usecols=['BorrowerState', 'BorrowerCity'])
+            
+            state_counts = df['BorrowerState'].value_counts().to_dict()
+            city_counts = df['BorrowerCity'].value_counts().to_dict()
+            
+            data = {
+                'state_counts': state_counts,
+                'city_counts': city_counts
+            }
+            
+            serializer = FrequencySerializer(data=data)
+            if serializer.is_valid():
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -156,3 +156,7 @@ class InputSerializer(serializers.Serializer):
         if not attrs.get('data') and not attrs.get('text'):
             raise serializers.ValidationError("Either 'data' or 'text' must be provided.")
         return attrs
+
+class FrequencySerializer(serializers.Serializer):
+    state_counts = serializers.DictField(child=serializers.IntegerField())
+    city_counts = serializers.DictField(child=serializers.IntegerField())
