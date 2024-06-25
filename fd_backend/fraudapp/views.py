@@ -61,7 +61,7 @@ class ChartsData(APIView):
         print("Client create")
         # Specify the bucket name and the key (file path within the bucket)
         bucket_name = 'fraud-detection-esse'
-        key = 'encoded_data.csv'
+        key = 'dataset_with_labels.csv'
         print("Start")
         # Get the object from S3
         response = s3.get_object(Bucket=bucket_name, Key=key)
@@ -347,7 +347,7 @@ class FileReaderAPIView(APIView):
 
             # Specify the bucket name and the key (file path within the bucket)
             bucket_name = 'fraud-detection-esse'
-            key = 'dataset_with_labels.csv'
+            key = 'encoded_data.csv'
 
             # Get the object from S3
             response = s3.get_object(Bucket=bucket_name, Key=key)
