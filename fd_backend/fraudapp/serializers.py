@@ -161,6 +161,13 @@ class FrequencySerializer(serializers.Serializer):
     state_counts = serializers.DictField(child=serializers.IntegerField())
     city_counts = serializers.DictField(child=serializers.IntegerField())
 
+
+class ForgivenessDataSerializer(serializers.Serializer):
+    ForgivenessDate = serializers.DateField()
+    ForgivenessAmount = serializers.FloatField()
+
 class GraphsSerializer(serializers.Serializer):
     top5_states = serializers.DictField(child=serializers.IntegerField())
     value_counts_arrays_specific = serializers.DictField(child=serializers.ListField(child=serializers.IntegerField()))
+    bar_data = serializers.ListField(child=ForgivenessDataSerializer())
+    line_data = serializers.ListField(child=ForgivenessDataSerializer())
